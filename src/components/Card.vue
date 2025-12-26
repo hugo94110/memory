@@ -40,11 +40,11 @@ const selectCard = () => {
 </script>
 
 <template>
-  <div class="gameCard" @click="selectCard">
-    <div v-if="visible" class="cardFace isFront">
+  <div class="gameCard" :class="{ isFlipped: visible }" @click="selectCard">
+    <div class="cardFace isFront">
       <img class="cardImage" :src="`/images/${value}.png`" :alt="value">
     </div>
-    <div v-else class="cardFace isBack"></div>
+    <div class="cardFace isBack"></div>
   </div>
 </template>
 
@@ -56,6 +56,9 @@ const selectCard = () => {
   background-color: #282828;
   border-radius: 25px;
   position: relative;
+  transition: 0.5s transform ease-in;
+  transform-style: preserve-3d;
+
 }
 
 .gameCard.isFlipped {
@@ -68,14 +71,18 @@ const selectCard = () => {
   border-radius: 25px;
   color: white;
   position: absolute;
+  backface-visibility: hidden;
 }
 
 .isBack {
-  background-color: blue;
+  /* background-color: ; */
+  background-image: url('/images/cardBack.png');
+  background-size: cover;
 }
 
 .isFront {
   background-color: red;
+  transform: rotateY(180deg);
 }
 
 .cardImage {

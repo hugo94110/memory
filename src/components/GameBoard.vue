@@ -19,7 +19,7 @@ const selectCard = payload => {
   <transition-group tag="section" class="gameBoard" name="shuffleCard">
     <Card
       v-for="card in cardList"
-      :key="`${card.value}`"
+      :key="card.position"
       :matched="card.matched"
       :value="card.value"
       :visible="card.visible"

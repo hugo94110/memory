@@ -2,9 +2,10 @@
 import { ref, watch } from 'vue'
 import Card from './components/Card.vue'
 import GameBoard from './components/GameBoard.vue'
+import GameButtons from './components/GameButtons.vue'
 
 // nom des cartes
-const cardsVal = ['test', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8']
+const cardsVal = ['test', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8'];
 
 // mélange + création du deck de cartes
 // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
@@ -42,8 +43,7 @@ const createDeck = () => {
   return melange
 }
 
-
-const cardList = ref(createDeck())
+const cardList = ref([]);
 
 // https://github.com/bencodezen/peek-a-vue
 // gestion des cartes
@@ -95,6 +95,22 @@ watch(userSelection, currentValue => {
   },
   { deep: true }
 );
+
+
+// jeu
+const game = ref(false);
+
+const startGame = () => {
+    game.value = true;
+    cardList.value = createDeck();
+};
+
+const restartGame = () => {
+    cardList.value = createDeck();
+    userSelection.value = [];
+    userCanFlipCard.value = true;
+
+};
 </script>
 
 <template>
@@ -104,7 +120,8 @@ watch(userSelection, currentValue => {
 
   <main>
     <h1>Memory Game</h1>
-    <GameBoard :cardList="cardList" @flip-card="flipCard" />
+    <GameButtons :game="game" @start-game="startGame" @restart-game="restartGame" />
+    <GameBoard v-if="game" :cardList="cardList" @flip-card="flipCard" />
   </main>
 </template>
 
