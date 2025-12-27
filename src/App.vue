@@ -1,8 +1,8 @@
 <script setup>
-import { ref, watch } from 'vue'
-import Card from './components/Card.vue'
+import { ref, watch, computed, onUnmounted } from 'vue'
 import GameBoard from './components/GameBoard.vue'
 import GameButtons from './components/GameButtons.vue'
+import Stats from './components/Stats.vue'
 
 // nom des cartes
 const cardsVal = ['test', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8'];
@@ -12,14 +12,11 @@ const cardsVal = ['test', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 
 function shuffle(array) {
   let currentIndex = array.length;
 
-  // While there remain elements to shuffle...
   while (currentIndex != 0) {
 
-    // Pick a remaining element...
     let randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
 
-    // And swap it with the current element.
     [array[currentIndex], array[randomIndex]] = [
       array[randomIndex], array[currentIndex]];
   }
@@ -45,7 +42,33 @@ const createDeck = () => {
 
 const cardList = ref([]);
 
-// https://github.com/bencodezen/peek-a-vue
+// Stats
+const attempts = ref(0)
+const timer = ref(0)
+let timerI = null
+
+
+const matched = computed(() => {
+  return cardList.value.filter(card => card.matched).length/2
+})
+
+const total = computed(() => cardList.value.length/2)
+
+const startTimer = () => {
+  // calculer en secondes
+  timer.value = 0
+  timerI = setInterval(() => {
+    timer.value++
+  }, 1000)
+}
+
+const stopTimer = () => {
+  if (timerI) {
+    clearInterval(timerI)
+    timerI = null
+  }
+}
+
 // gestion des cartes
 const userSelection = ref([]);
 const userCanFlipCard = ref(true);
@@ -73,6 +96,8 @@ const flipCard = payload => {
 
 watch(userSelection, currentValue => {
     if (currentValue.length === 2) {
+      attempts.value++  // ajoute un essai
+      
       const cardOne = currentValue[0];
       const cardTwo = currentValue[1];
 
@@ -87,7 +112,7 @@ watch(userSelection, currentValue => {
           cardList.value[cardOne.position].visible = false;
           cardList.value[cardTwo.position].visible = false;
           userCanFlipCard.value = true;
-        }, 1800);
+        }, 1500);
       }
 
       userSelection.value.length = 0;
@@ -102,15 +127,26 @@ const game = ref(false);
 
 const startGame = () => {
     game.value = true;
+    attempts.value = 0;
     cardList.value = createDeck();
+    startTimer();
 };
 
 const restartGame = () => {
+    stopTimer();
+    attempts.value = 0;
     cardList.value = createDeck();
     userSelection.value = [];
     userCanFlipCard.value = true;
-
+    startTimer();
 };
+
+//
+watch(matched, (newVal) => {
+  if (newVal === total.value && newVal>0) {
+    stopTimer()
+  }
+})
 </script>
 
 <template>
@@ -122,6 +158,7 @@ const restartGame = () => {
     <h1>Memory Game</h1>
     <GameButtons :game="game" @start-game="startGame" @restart-game="restartGame" />
     <GameBoard v-if="game" :cardList="cardList" @flip-card="flipCard" />
+    <Stats v-if="game" :timer="timer" :attempts="attempts" :matched="matched" :total="total" />
   </main>
 </template>
 

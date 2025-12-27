@@ -76,12 +76,12 @@ const selectCard = () => {
 
 .isBack {
   /* background-color: ; */
-  background-image: url('/images/cardBack.png');
-  background-size: cover;
+  /* background-image: url('/images/cardBack.png');
+  background-size: cover; */
 }
 
 .isFront {
-  background-color: red;
+  /* background-color: red; */
   transform: rotateY(180deg);
 }
 
