@@ -42,7 +42,7 @@ const selectCard = () => {
 <template>
   <div class="gameCard" :class="{ isFlipped: visible }" @click="selectCard">
     <div class="cardFace isFront">
-      <img class="cardImage" :src="`/images/${value}.png`" :alt="value">
+      <img class="cardImage" :src="`/images/${value}.jpg`" :alt="value">
     </div>
     <div class="cardFace isBack"></div>
   </div>
@@ -72,6 +72,10 @@ const selectCard = () => {
   color: white;
   position: absolute;
   backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  object-fit: cover;
 }
 
 .isBack {
