@@ -25,9 +25,6 @@ defineProps({
         <p>Paires : {{matched}}</p>
         <p>Temps : {{timer}}s</p>
     </div>
-    <div v-if="matched === total && total>0" class="statsContainer">
-        <p>Vous avez gagné !</p>
-    </div>
 </template>
 
 <style scoped>

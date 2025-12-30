@@ -1,28 +1,36 @@
 <script setup>
-import { ref, watch, computed, onUnmounted } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import GameBoard from './components/GameBoard.vue'
 import GameButtons from './components/GameButtons.vue'
 import Stats from './components/Stats.vue'
 import Difficulty from './components/Difficulty.vue'
+import NicknameModal from './components/NicknameModal.vue'
+import GameHistory from './components/GameHistory.vue'
 
-// TOUTES les cartes disponibles
 const allCards = ['snake', 'resident', 'red_dead2', 'persona', 'night_reign', 'monsterhunter', 'Minecraft', 'kingdom2', 'human', 'gta6', 'gta', 'Forza', 'FC26', 'expedition', 'DS3', 'chronos', 'BF6', '2k'];
 
-// Difficulté par défaut
-const gridSize = ref(4)
+// difficulté par défaut = 4x4
+const difficulty = ref(1)
 
-// Configuration des grilles
 const gridConfig = computed(() => {
-  if (gridSize.value === 4) return { cols: 4, totalCards: 16 }
-  if (gridSize.value === 20) return { cols: 5, totalCards: 20 }
-  if (gridSize.value === 6) return { cols: 6, totalCards: 36 }
-  return { cols: 4, totalCards: 16 }
+  if (difficulty.value === 1) {
+    return { cols: 4, totalCards: 16 }
+  }
+  else if (difficulty.value === 2) {
+    return { cols: 5, totalCards: 20 }
+  }
+  else if (difficulty.value === 3) {
+    return { cols: 6, totalCards: 36 }
+  }
+  else {
+    return { cols: 4, totalCards: 16 }
+  }
 })
 
-// Calcul du nombre de paires nécessaires
 const nbPairs = computed(() => gridConfig.value.totalCards / 2)
 
 // mélange + création du deck de cartes
+// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 function shuffle(array) {
   let currentIndex = array.length;
 
@@ -38,10 +46,8 @@ function shuffle(array) {
 
 const createDeck = () => {
   const cards = []
-  const totalCards = gridConfig.value.totalCards
-
-  // Prendre uniquement le nombre de cartes nécessaires selon la difficulté
   const cardsVal = allCards.slice(0, nbPairs.value)
+  
 
   cardsVal.forEach(value => {
     cards.push({ value, visible: false, matched: false })
@@ -59,7 +65,7 @@ const createDeck = () => {
 
 const cardList = ref([]);
 
-// Stats
+// stats
 const attempts = ref(0)
 const timer = ref(0)
 let timerI = null
@@ -84,7 +90,10 @@ const stopTimer = () => {
   }
 }
 
-// gestion des cartes
+
+
+
+// 
 const userSelection = ref([]);
 const userCanFlipCard = ref(true);
 
@@ -136,6 +145,9 @@ watch(userSelection, currentValue => {
   { deep: true }
 );
 
+
+
+
 // jeu
 const game = ref(false);
 
@@ -148,29 +160,88 @@ const startGame = () => {
 
 const restartGame = () => {
   stopTimer();
-  attempts.value = 0;
-  cardList.value = createDeck();
-  userSelection.value = [];
-  userCanFlipCard.value = true;
-  startTimer();
+  userCanFlipCard.value = false;
+  
+  // cacher les cartes
+  cardList.value.forEach(card => {
+    card.visible = false;
+    card.matched = false;
+  });
+  
+  // attendre 500ms pour réafficher
+  setTimeout(() => {
+    attempts.value = 0;
+    cardList.value = createDeck();
+    userSelection.value = [];
+    userCanFlipCard.value = true;
+    startTimer();
+  }, 500);
 };
 
-const changeDifficulty = (newSize) => {
-  gridSize.value = newSize
-
+const changeDifficulty = (newDifficulty) => {
+  difficulty.value = newDifficulty
   if (game.value) {
-    restartGame()
+    stopTimer()
+    attempts.value = 0
+    userSelection.value = []
+    userCanFlipCard.value = true
+    cardList.value = createDeck()
+    startTimer()
   }
 }
 
-// Nettoyer le timer quand le composant est détruit
-onUnmounted(() => {
-  stopTimer()
+
+
+// gestion de l'historique
+const gameHistory = ref([])
+const showNicknameModal = ref(false)
+
+onMounted(() => {
+  const saved = localStorage.getItem('memoryGameHistory')
+  if (saved) {
+    gameHistory.value = JSON.parse(saved)
+  }
 })
+
+const saveHistory = () => {
+  localStorage.setItem('memoryGameHistory', JSON.stringify(gameHistory.value))
+}
+
+const addToHistory = (nickname) => {
+  const gameData = {
+    id: Date.now(),
+    nickname: nickname,
+    difficulty: difficulty.value,
+    timer: timer.value,
+    attempts: attempts.value,
+    date: new Date().toISOString()
+  }
+  
+  gameHistory.value.unshift(gameData)
+  saveHistory()
+  showNicknameModal.value = false
+}
+
+const deleteFromHistory = (gameId) => {
+  if (confirm('Voulez-vous vraiment supprimer cette partie ?')) {
+    gameHistory.value = gameHistory.value.filter(game => game.id !== gameId)
+    saveHistory()
+  }
+}
+
+const deleteAllHistory = () => {
+  if (confirm('Voulez-vous vraiment supprimer tout l\'historique ? Cette action est irréversible.')) {
+    gameHistory.value = []
+    saveHistory()
+  }
+}
 
 watch(matched, (newVal) => {
   if (newVal === total.value && newVal > 0) {
     stopTimer()
+    setTimeout(() => {
+      showNicknameModal.value = true
+    }, 500)
   }
 })
 </script>
@@ -182,10 +253,22 @@ watch(matched, (newVal) => {
 
   <main>
     <h1>Memory Game</h1>
-    <Difficulty @change-difficulty="changeDifficulty" :current-size="gridSize" />
+    <Difficulty @change-difficulty="changeDifficulty" :current-difficulty="difficulty" />
     <GameButtons :game="game" @start-game="startGame" @restart-game="restartGame" />
-    <GameBoard v-if="game" :cardList="cardList" @flip-card="flipCard" :grid-cols="gridConfig.cols" />
     <Stats v-if="game" :timer="timer" :attempts="attempts" :matched="matched" :total="total" />
+    <GameBoard v-if="game" :cardList="cardList" @flip-card="flipCard" :grid-cols="gridConfig.cols" />
+    
+    <NicknameModal 
+      :show="showNicknameModal" 
+      @submit="addToHistory"
+    />
+    
+    <GameHistory 
+      v-if="!game || matched === total"
+      :history="gameHistory"
+      @delete="deleteFromHistory"
+      @deleteAll="deleteAllHistory"
+    />
   </main>
 </template>
 

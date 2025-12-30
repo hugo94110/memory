@@ -2,64 +2,54 @@
 import { defineProps, defineEmits } from 'vue'
 
 const props = defineProps({
-    currentSize: {
+    currentDifficulty: {
         type: Number,
-        default: 4
+        default: 1
     }
 })
 
-const emit = defineEmits(['change-difficulty'])
+const emit = defineEmits(['changeDifficulty'])
 
-function selectDifficulty(size) {
-    emit('change-difficulty', size)
+function setDifficulty(size) {
+    emit('changeDifficulty', size)
 }
 </script>
 
 <template>
-    <div class="difficulty-selector">
-        <div class="buttons">
-            <button @click="selectDifficulty(4)" :class="{ active: currentSize === 4 }" class="btn">4×4</button>
-
-            <button @click="selectDifficulty(20)" :class="{ active: currentSize === 20 }" class="btn">5×4</button>
-
-            <button @click="selectDifficulty(6)" :class="{ active: currentSize === 6 }" class="btn">6×6</button>
-        </div>
+    <div class="difficultyButtons">
+        <button @click="setDifficulty(1)" :class="{ active: currentDifficulty === 1 }" class="btn">4×4</button>
+        <button @click="setDifficulty(2)" :class="{ active: currentDifficulty === 2 }" class="btn">5×4</button>
+        <button @click="setDifficulty(3)" :class="{ active: currentDifficulty === 3 }" class="btn">6×6</button>
     </div>
 </template>
 
 <style scoped>
-.difficulty-selector {
-    margin: 24px 0;
-}
-
-.buttons {
+.difficultyButtons {
     display: flex;
     gap: 16px;
     justify-content: center;
+    margin: 20px 0;
 }
 
 .btn {
-    padding: 0;
-    width: 80px;
-    height: 80px;
-    font-size: 24px;
-    font-weight: 600;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
+    padding: 5px 14px;
+    font-size: 19px;
+    font-weight: 500;
+    border: 2px solid #282828;
+    border-radius: 25px;
     cursor: pointer;
-    transition: all 0.2s;
-    background: white;
-    color: gray;
+    background: transparent;
+    color: white;
 }
 
 .btn:hover {
-    border-color: gray;
-    color: gray;
+    border-color: #444444;
+    background-color: #282828;
 }
 
 .btn.active {
-    background: gray;
+    background: #282828;
     color: white;
-    border-color: gray;
+    border-color: #444444;
 }
 </style>

@@ -10,7 +10,6 @@ defineProps({
 const emits = defineEmits(["startGame", "restartGame"]);
 
 </script>
-
 <template>
     <div class="buttonContainer" v-if="!game">
         <div class="startButton" @click="emits('startGame')">Lancer</div>
@@ -18,7 +17,6 @@ const emits = defineEmits(["startGame", "restartGame"]);
 
     <div class="buttonContainer" v-else>
         <div class="restartButton" @click="emits('restartGame')">Redémarrer</div>
-        <div class="resetButton">Réinitialiser</div>
     </div>
 
 </template>

@@ -22,12 +22,6 @@ const props = defineProps({
 
 const emits = defineEmits(["selectCard"]);
 
-const flippedStyles = computed(() => {
-  if (props.visible) {
-    return "isFlipped";
-  }
-});
-
 const selectCard = () => {
   if (!props.matched) {
     emits("selectCard", {
@@ -79,17 +73,18 @@ const selectCard = () => {
 }
 
 .isBack {
-  /* background-color: ; */
-  /* background-image: url('/images/cardBack.png');
-  background-size: cover; */
+  background: #282828;
 }
 
 .isFront {
-  /* background-color: red; */
   transform: rotateY(180deg);
+  overflow: hidden;
 }
 
 .cardImage {
-  max-width: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 25px;
 }
 </style>

@@ -19,8 +19,8 @@ const selectCard = payload => {
   emits("flipCard", payload);
 };
 
-// Calcul dynamique du nombre de colonnes
-const gridColumns = computed(() => `repeat(${props.gridCols}, 1fr)`);
+
+const gridColumns = computed(() => `repeat(${props.gridCols}, 140px)`);
 </script>
 
 <template>
@@ -33,11 +33,9 @@ const gridColumns = computed(() => `repeat(${props.gridCols}, 1fr)`);
 .gameBoard {
   display: grid;
   gap: 20px;
-  margin-top: 20px;
+  /* margin-top: 20px; */
   padding: 20px;
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
+  justify-content: center;
   background-color: transparent;
 }
 </style>
