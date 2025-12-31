@@ -192,7 +192,7 @@ const changeDifficulty = (newDifficulty) => {
 
 
 
-// gestion de l'historique
+// gestion de l'historique + pseudo
 const gameHistory = ref([])
 const showNicknameModal = ref(false)
 
