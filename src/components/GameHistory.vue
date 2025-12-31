@@ -1,4 +1,6 @@
 <script setup>
+import { ref } from 'vue'
+
 const props = defineProps({
   history: {
     type: Array,
@@ -6,7 +8,27 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['delete', 'deleteAll'])
+const emit = defineEmits(['delete', 'deleteAll', 'editNickname'])
+
+const editingId = ref(null)
+const editingNickname = ref('')
+
+const startEdit = (game) => {
+  editingId.value = game.id
+  editingNickname.value = game.nickname
+}
+
+const cancelEdit = () => {
+  editingId.value = null
+  editingNickname.value = ''
+}
+
+const saveEdit = (gameId) => {
+  if (editingNickname.value.trim()) {
+    emit('editNickname', gameId, editingNickname.value.trim())
+    cancelEdit()
+  }
+}
 
 const getDifficultyLabel = (difficulty) => {
   if (difficulty === 1) {
@@ -21,17 +43,6 @@ const getDifficultyLabel = (difficulty) => {
   else {
     return difficulty
   }
-}
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
 }
 </script>
 
@@ -60,21 +71,35 @@ const formatDate = (dateString) => {
             <th>Difficulté</th>
             <th>Temps</th>
             <th>Essais</th>
-            <th>Date</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="game in history" :key="game.id" class="historyRow">
-            <td class="nicknameCell">{{ game.nickname }}</td>
+            <td class="nicknameCell">
+              <div v-if="editingId === game.id" class="editContainer">
+                <input 
+                  v-model="editingNickname" 
+                  @keyup.enter="saveEdit(game.id)"
+                  @keyup.esc="cancelEdit"
+                  class="editInput"
+                  maxlength="20"
+                />
+              </div>
+              <span v-else>{{ game.nickname }}</span>
+            </td>
             <td>{{ getDifficultyLabel(game.difficulty) }}</td>
             <td>{{ game.timer }}s</td>
             <td>{{ game.attempts }}</td>
-            <td class="dateCell">{{ formatDate(game.date) }}</td>
-            <td>
-              <button @click="emit('delete', game.id)" class="btnDelete">
-                Supprimer
-              </button>
+            <td class="actionsCell">
+              <div v-if="editingId === game.id" class="actionButtons">
+                <button @click="saveEdit(game.id)" class="btnSave">✓</button>
+                <button @click="cancelEdit" class="btnCancel">✕</button>
+              </div>
+              <div v-else class="actionButtons">
+                <button @click="startEdit(game)" class="btnEdit">Modifier</button>
+                <button @click="emit('delete', game.id)" class="btnDelete">Supprimer</button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -161,9 +186,28 @@ td {
   font-weight: 600;
 }
 
-.dateCell {
+.actionsCell {
+  text-align: right;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btnEdit, .btnSave, .btnCancel {
+  padding: 8px 16px;
+  background-color: #282828;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
   font-size: 13px;
-  opacity: 0.6;
+}
+
+.btnEdit:hover, .btnSave:hover, .btnCancel:hover {
+  background-color: #444444;
 }
 
 .btnDelete {
@@ -178,6 +222,21 @@ td {
 
 .btnDelete:hover {
   background-color: #b91c1c;
+}
+
+.editInput {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: #282828;
+  color: white;
+  font-size: 14px;
+  width: 120px;
+}
+
+.editInput:focus {
+  outline: none;
+  background: #333;
 }
 
 @media (max-width: 768px) {

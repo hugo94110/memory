@@ -236,6 +236,14 @@ const deleteAllHistory = () => {
   }
 }
 
+const editNickname = (gameId, newNickname) => {
+  const game = gameHistory.value.find(g => g.id === gameId)
+  if (game) {
+    game.nickname = newNickname
+    saveHistory()
+  }
+}
+
 watch(matched, (newVal) => {
   if (newVal === total.value && newVal > 0) {
     stopTimer()
@@ -257,18 +265,8 @@ watch(matched, (newVal) => {
     <GameButtons :game="game" @start-game="startGame" @restart-game="restartGame" />
     <Stats v-if="game" :timer="timer" :attempts="attempts" :matched="matched" :total="total" />
     <GameBoard v-if="game" :cardList="cardList" @flip-card="flipCard" :grid-cols="gridConfig.cols" />
-    
-    <NicknameModal 
-      :show="showNicknameModal" 
-      @submit="addToHistory"
-    />
-    
-    <GameHistory 
-      v-if="!game || matched === total"
-      :history="gameHistory"
-      @delete="deleteFromHistory"
-      @deleteAll="deleteAllHistory"
-    />
+    <NicknameModal :show="showNicknameModal" @submit="addToHistory"/>
+    <GameHistory v-if="!game || matched === total" :history="gameHistory" @delete="deleteFromHistory" @deleteAll="deleteAllHistory" @edit-nickname="editNickname"/>
   </main>
 </template>
 
