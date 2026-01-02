@@ -12,10 +12,6 @@ defineProps({
     type: Number,
     required: true
   },
-  total: {
-    type: Number,
-    required: true
-  }
 })
 </script>
 

@@ -178,6 +178,9 @@ const restartGame = () => {
   }, 500);
 };
 
+
+
+
 const changeDifficulty = (newDifficulty) => {
   difficulty.value = newDifficulty
   if (game.value) {
@@ -263,7 +266,7 @@ watch(matched, (newVal) => {
     <h1>Memory Game</h1>
     <Difficulty @change-difficulty="changeDifficulty" :current-difficulty="difficulty" />
     <GameButtons :game="game" @start-game="startGame" @restart-game="restartGame" />
-    <Stats v-if="game" :timer="timer" :attempts="attempts" :matched="matched" :total="total" />
+    <Stats v-if="game" :timer="timer" :attempts="attempts" :matched="matched" />
     <GameBoard v-if="game" :cardList="cardList" @flip-card="flipCard" :grid-cols="gridConfig.cols" />
     <NicknameModal :show="showNicknameModal" @submit="addToHistory"/>
     <GameHistory v-if="!game || matched === total" :history="gameHistory" @delete="deleteFromHistory" @deleteAll="deleteAllHistory" @edit-nickname="editNickname"/>
